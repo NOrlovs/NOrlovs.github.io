@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>SafeRide Risk Prediction — Nikita Orlovs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--w:#FAFAF8;--ink:#1A1A18;--mid:#4A4A47;--muted:#9A9A96;--border:#E4E4E0;--acc:#E85D04;--card:#F4F4F0;--dk:#141412;--dkc:#1E1E1C;--dkb:#2E2E2B}
+    html{scroll-behavior:smooth}body{font-family:'Figtree',sans-serif;background:var(--w);color:var(--ink);line-height:1.6;overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--acc);border-radius:3px}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 5vw;height:60px;background:rgba(250,250,248,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+    .nav-back{display:inline-flex;align-items:center;gap:8px;font-size:.82rem;font-weight:500;color:var(--mid);text-decoration:none;transition:color .2s}.nav-back:hover{color:var(--acc)}.nav-back svg{width:16px;height:16px}
+    .nav-logo{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--ink);text-decoration:none}.nav-logo span{color:var(--acc)}
+    .nav-gh{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:var(--ink);color:#fff;border-radius:4px;font-size:.8rem;font-weight:600;text-decoration:none;transition:background .2s}.nav-gh:hover{background:var(--acc)}.nav-gh svg{width:14px;height:14px}
+    .hero{background:var(--dk);padding:110px 5vw 80px;position:relative;overflow:hidden}
+    .hero-bg{position:absolute;top:50%;right:-2vw;transform:translateY(-50%);font-family:'Playfair Display',serif;font-size:clamp(80px,13vw,170px);font-weight:700;color:transparent;-webkit-text-stroke:1px #252523;pointer-events:none;user-select:none;white-space:nowrap;z-index:0}
+    .hero-inner{max-width:860px;position:relative;z-index:1}
+    .hero-pill{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border:1px solid var(--dkb);border-radius:100px;font-size:.72rem;font-weight:500;color:#7A7A76;margin-bottom:1.5rem;letter-spacing:.04em}
+    .hero-dot{width:6px;height:6px;background:var(--acc);border-radius:50%}
+    h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5vw,3.8rem);font-weight:700;color:#fff;line-height:1.1;letter-spacing:-.03em;margin-bottom:1rem}h1 em{font-style:italic;color:var(--acc)}
+    .hero-sub{font-size:1rem;font-weight:300;color:#8A8A86;max-width:580px;line-height:1.8;margin-bottom:2.5rem}.hero-sub strong{color:#C0C0BC;font-weight:500}
+    .hero-meta{display:flex;flex-wrap:wrap;gap:2rem;margin-bottom:2.5rem;padding-bottom:2.5rem;border-bottom:1px solid var(--dkb)}
+    .meta-item .meta-label{font-size:.65rem;font-weight:600;color:#5A5A56;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px}
+    .meta-item .meta-val{font-size:.88rem;font-weight:500;color:#C0C0BC}
+    .hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
+    .btn-p{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:var(--acc);color:#fff;border-radius:4px;font-size:.85rem;font-weight:600;text-decoration:none;transition:background .2s,transform .15s}.btn-p:hover{background:#FF7A2F;transform:translateY(-2px)}
+    .btn-o{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:transparent;color:#8A8A86;border:1.5px solid var(--dkb);border-radius:4px;font-size:.85rem;font-weight:500;text-decoration:none;transition:border-color .2s,color .2s,transform .15s}.btn-o:hover{border-color:var(--acc);color:var(--acc);transform:translateY(-2px)}
+    .main-img{background:var(--dkc);border-bottom:1px solid var(--dkb);overflow:hidden;max-height:500px;display:flex;justify-content:center}
+    .main-img img{width: 50%;max-width: 100%;display: block;object-fit: cover;margin: 0 auto;object-position: 0 6%;background-color: white;}
+    .sec{padding:80px 5vw}.sec.dk{background:var(--dk)}.sec.card{background:var(--card)}
+    .sec-label{font-size:.7rem;font-weight:600;color:var(--acc);text-transform:uppercase;letter-spacing:.12em;display:flex;align-items:center;gap:10px;margin-bottom:.7rem}
+    .sec-label::before{content:'';display:block;width:22px;height:2px;background:var(--acc)}
+    h2{font-family:'Playfair Display',serif;font-size:clamp(1.7rem,3.5vw,2.5rem);font-weight:700;color:var(--ink);line-height:1.15;letter-spacing:-.02em;margin-bottom:1rem}h2.l{color:#fff}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}.two.rev{direction:rtl}.two.rev>*{direction:ltr}
+    p.b{font-size:.92rem;font-weight:300;color:var(--mid);line-height:1.8;margin-bottom:.9rem}p.b strong{color:var(--ink);font-weight:500}p.b.l{color:#8A8A86}p.b.l strong{color:#C0C0BC}
+    .imgbox{border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--card)}.imgbox.dk{border-color:var(--dkb);background:var(--dkc)}.imgbox img{width:100%;display:block}
+    .imgcap{font-size:.72rem;color:var(--muted);padding:9px 14px;border-top:1px solid var(--border);font-style:italic}.imgcap.dk{color:#5A5A56;border-color:var(--dkb)}
+    .img2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .data-table{width:100%;border-collapse:collapse;margin-top:1.5rem;font-size:.86rem}
+    .data-table th{font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:8px 12px;border-bottom:2px solid var(--border);text-align:left}
+    .data-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--mid);font-weight:300}
+    .data-table tr:last-child td{border-bottom:none}
+    .model-table{width:100%;border-collapse:collapse;margin-top:1.5rem;font-size:.86rem}
+    .model-table th{font-size:.68rem;font-weight:600;color:#5A5A56;text-transform:uppercase;letter-spacing:.08em;padding:8px 12px;border-bottom:2px solid var(--dkb);text-align:left;background:transparent;color:#5A5A56}
+    .model-table td{padding:9px 12px;border-bottom:1px solid var(--dkb);color:#8A8A86;font-weight:300}
+    .model-table tr.best td{color:#C0C0BC;font-weight:500}
+    .model-table tr.best td.acc{color:var(--acc);font-weight:700}
+    .model-table tr:last-child td{border-bottom:none}
+    .callout{padding:1.2rem 1.4rem;background:rgba(232,93,4,.08);border:1px solid rgba(232,93,4,.2);border-radius:8px;font-size:.88rem;color:var(--mid);line-height:1.6;margin-top:1rem}
+    .callout strong{color:var(--acc)}
+    .callout.dk-bg{background:rgba(232,93,4,.1);border-color:rgba(232,93,4,.25);color:#8A8A86}
+    .callout.dk-bg strong{color:var(--acc)}
+    .risk-badges{display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.2rem}
+    .risk-badge{padding:8px 18px;border-radius:6px;font-size:.82rem;font-weight:600;letter-spacing:.04em}
+    .rb-low{background:rgba(34,197,94,.12);color:#4ADE80;border:1px solid rgba(34,197,94,.25)}
+    .rb-med{background:rgba(234,179,8,.12);color:#FCD34D;border:1px solid rgba(234,179,8,.25)}
+    .rb-high{background:rgba(239,68,68,.12);color:#F87171;border:1px solid rgba(239,68,68,.25)}
+    .metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1px;background:var(--dkb);border:1px solid var(--dkb);border-radius:10px;overflow:hidden;margin-top:2rem}
+    .metric{background:var(--dkc);padding:1.4rem;text-align:center}
+    .metric-n{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:#fff;letter-spacing:-.03em;line-height:1}.metric-n span{color:var(--acc)}
+    .metric-l{font-size:.68rem;font-weight:500;color:#5A5A56;margin-top:6px;text-transform:uppercase;letter-spacing:.08em}
+    .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:1.5rem}
+    .pill{padding:6px 14px;background:var(--card);border:1px solid var(--border);border-radius:100px;font-size:.82rem;font-weight:400;color:var(--ink);transition:all .2s}.pill:hover{background:var(--acc);border-color:var(--acc);color:#fff}
+    .pill.c{background:var(--ink);border-color:var(--ink);color:var(--w)}.pill.c:hover{background:var(--acc);border-color:var(--acc)}
+    .app-screens{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.5rem}
+    .app-screen{border-radius:10px;overflow:hidden;border:1px solid var(--border);display: flex;flex-direction: column;gap: 8px;}.app-screen img{width:100%;display:block}
+    .cta-sec{background:var(--dk);padding:80px 5vw;text-align:center}
+    .cta-sec h2{color:#fff;margin-bottom:1rem}.cta-sec p{color:#7A7A76;max-width:480px;margin:0 auto 2.5rem;font-size:.92rem;line-height:1.7}
+    .cta-btns{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
+    footer{background:var(--dk);border-top:1px solid var(--dkb);padding:20px 5vw;display:flex;align-items:center;justify-content:space-between}
+    .f-logo{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;color:#fff;text-decoration:none}.f-logo span{color:var(--acc)}
+    .f-copy{font-size:.75rem;color:#3A3A36}
+    .fade{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}.fade.on{opacity:1;transform:translateY(0)}
+    @media(max-width:800px){.two{grid-template-columns:1fr}.two.rev{direction:ltr}.img2{grid-template-columns:1fr}.app-screens{grid-template-columns:1fr 1fr}footer{flex-direction:column;gap:8px;text-align:center}}
+  </style>
+</head>
+<body>
+<nav>
+  <a class="nav-back" href="../index.html"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3L5 8l5 5"/></svg>All Projects</a>
+  <a class="nav-logo" href="../index.html">N<span>.</span>Orlovs</a>
+  <a class="nav-gh" href="https://github.com/NOrlovs/saferide-risk-prediction" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub
+  </a>
+</nav>
+
+<div class="hero">
+  <div class="hero-bg" aria-hidden="true">ML</div>
+  <div class="hero-inner fade">
+    <div class="hero-pill"><span class="hero-dot"></span>ML · PostgreSQL · Figma</div>
+    <h1>SafeRide — Road Risk<br><em>Prediction for ANWB</em></h1>
+    <p class="hero-sub">Predicting road incident risk levels (Low / Medium / High) in Breda using <strong>weather data + ANWB incident records</strong>. Four models compared, 138K records, Streamlit prototype, and a full mobile app design in Figma.</p>
+    <div class="hero-meta">
+      <div class="meta-item"><div class="meta-label">Client</div><div class="meta-val">ANWB (via BUas)</div></div>
+      <div class="meta-item"><div class="meta-label">Timeline</div><div class="meta-val">May – Jun 2024</div></div>
+      <div class="meta-item"><div class="meta-label">Role</div><div class="meta-val">ML Engineer / Data Engineer</div></div>
+      <div class="meta-item"><div class="meta-label">Dataset</div><div class="meta-val">~138K records, 4 sources</div></div>
+    </div>
+    <div class="hero-btns">
+      <a class="btn-p" href="https://github.com/NOrlovs/saferide-risk-prediction" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width:15px;height:15px"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>View on GitHub
+      </a>
+      <a class="btn-o" href="https://www.figma.com/design/V9N3mzaO96CdqtyNn7d0ru/Project-Application-%22SafeRide%22" target="_blank" rel="noopener">View Figma Design ↗</a>
+      <a class="btn-o" href="../index.html">← Portfolio</a>
+    </div>
+  </div>
+</div>
+
+<div class="main-img" style="background:white;"><img src="../assets/projects/saferide-homepage.png" alt="SafeRide app home screen" loading="lazy"/></div>
+
+<div class="sec fade">
+  <div class="sec-label">Overview</div>
+  <div class="two">
+    <div>
+      <h2>Can weather predict<br>road incidents?</h2>
+      <p class="b">ANWB collects road incident data across the Netherlands. The question: given weather conditions at a specific time and place, can you predict whether the risk of an incident is Low, Medium, or High?</p>
+      <p class="b">I joined four datasets — ANWB incident reports and three KNMI weather tables (temperature, wind, precipitation) — on rounded hourly timestamps, engineering a composite risk score from the combined signals. After cleaning and joining: <strong>~138,000 records</strong>.</p>
+      <p class="b">Four ML models were trained and compared. The result wasn't the one with the highest raw accuracy — it was the one with the <strong>best balance across all three risk classes</strong>. That distinction matters in a safety application.</p>
+    </div>
+    <div>
+      <div class="imgbox">
+        <img src="../assets/projects/saferide-schema.png" alt="Data warehouse schema" loading="lazy"/>
+        <div class="imgcap">Data warehouse schema — 4 tables joined on hourly timestamps</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sec card fade">
+  <div class="sec-label">Feature Engineering</div>
+  <div class="two rev">
+    <div>
+      <div class="imgbox">
+        <img src="../assets/projects/saferide-dist.png" alt="Class distribution" loading="lazy"/>
+        <div class="imgcap">Class imbalance in training data — Medium dominates at 53%</div>
+      </div>
+    </div>
+    <div>
+      <h2>Building a composite<br>risk score</h2>
+      <p class="b">The target variable doesn't exist in the raw data — it has to be engineered. A composite risk score was built from three components, each binned 1–3:</p>
+      <table class="data-table">
+        <tr><th>Component</th><th>Bins</th><th>Logic</th></tr>
+        <tr><td>Temperature risk</td><td>1–3</td><td>cold → mild → hot</td></tr>
+        <tr><td>Street risk</td><td>1–3</td><td>historical accident count per road</td></tr>
+        <tr><td>Wind speed risk</td><td>1–3</td><td>calm → moderate → strong</td></tr>
+      </table>
+      <p class="b" style="margin-top:1rem">Total = temp + street + wind → thresholded into risk classes:</p>
+      <div class="risk-badges">
+        <span class="risk-badge rb-low">≤ 4 → Low</span>
+        <span class="risk-badge rb-med">5–7 → Medium</span>
+        <span class="risk-badge rb-high">≥ 8 → High</span>
+      </div>
+      <p class="b" style="margin-top:1rem">Additional interaction features: <strong>temp × wind_speed</strong> and <strong>wind_diff</strong>. The resulting class distribution (Low 19%, Medium 53%, High 28%) reflects real-world incident patterns — an important finding in itself.</p>
+    </div>
+  </div>
+</div>
+
+<div class="sec dk fade">
+  <div class="sec-label">Model Comparison</div>
+  <div class="two">
+    <div>
+      <h2 class="l">Why KNN won —<br>not for accuracy</h2>
+      <p class="b l">Four models were trained and compared. Random Forest achieved the highest raw accuracy, but its F1 on Low Risk was 0.01 — it essentially couldn't predict that class at all. That's unacceptable for a safety application.</p>
+      <p class="b l"><strong>KNN (k=11) was selected for deployment</strong> because it maintained the best balance across all three risk classes, despite not having the highest headline accuracy number.</p>
+      <div class="callout dk-bg">
+        <strong>Key finding:</strong> Upsampling the Low Risk minority class hurt performance dramatically — accuracy dropped from 69% to 43%. The class imbalance reflects real-world incident distribution and should not be artificially corrected.
+      </div>
+      <table class="model-table" style="margin-top:1.5rem">
+        <tr><th>Model</th><th>Accuracy</th><th>Note</th></tr>
+        <tr><td>Random Forest</td><td>71.7%</td><td>F1 on Low Risk: 0.01</td></tr>
+        <tr><td>Gradient Boosting</td><td>~70%</td><td>Best recall on High Risk</td></tr>
+        <tr class="best"><td>KNN (k=11) ✓</td><td class="acc">69.2%</td><td>Best class balance</td></tr>
+        <tr><td>Neural Network</td><td>~68%</td><td>Dense MLP, no gain</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="imgbox dk">
+        <img src="../assets/projects/saferide-matrix.png" alt="KNN confusion matrix" loading="lazy"/>
+        <div class="imgcap dk">KNN (k=11) confusion matrix on the test set</div>
+      </div>
+      <div class="metrics" style="margin-top:1rem">
+        <div class="metric"><div class="metric-n">138<span>K</span></div><div class="metric-l">Records</div></div>
+        <div class="metric"><div class="metric-n">69<span>%</span></div><div class="metric-l">KNN accuracy</div></div>
+        <div class="metric"><div class="metric-n">4</div><div class="metric-l">Data sources</div></div>
+        <div class="metric"><div class="metric-n">3</div><div class="metric-l">Risk classes</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sec fade">
+  <div class="sec-label">Mobile App Design</div>
+  <div class="two">
+    <div>
+      <h2>Full UI/UX design<br>in Figma</h2>
+      <p class="b">Beyond the ML model, a complete mobile application was designed in Figma — covering the full user flow from signup to real-time risk alerts and incident reporting.</p>
+      <p class="b">The design covers: <strong>home map with live risk overlays, incident history, report form, user profile</strong>, and onboarding. All screens are linked and interactive in Figma.</p>
+      <a class="btn-p" href="https://www.figma.com/design/V9N3mzaO96CdqtyNn7d0ru/Project-Application-%22SafeRide%22" target="_blank" rel="noopener" style="margin-top:.5rem;display:inline-flex">View Full Figma Design ↗</a>
+    </div>
+    <div>
+      <div class="app-screens">
+        <div class="app-screen"><img src="../assets/projects/saferide-homepage.png" alt="App home"/></div>
+        <div class="app-screen">
+          <img src="../assets/projects/saferide-signup.png" alt="App signup"/>
+          <img src="../assets/projects/saferide-report.png" alt="Report form"/>
+        </div>
+        <div class="app-screen">
+          <img src="../assets/projects/saferide-user_info.png" alt="App user information"/>
+          <img src="../assets/projects/saferide-history.png" alt="App history"/>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sec card fade">
+  <div class="sec-label">Tech Stack</div>
+  <h2>What went into it</h2>
+  <div class="pills">
+    <span class="pill c">Python 3.11</span><span class="pill c">PostgreSQL</span><span class="pill c">scikit-learn</span>
+    <span class="pill">Streamlit</span><span class="pill">psycopg2</span><span class="pill">pandas</span>
+    <span class="pill">Matplotlib</span><span class="pill">Seaborn</span><span class="pill">Figma</span>
+    <span class="pill">KNN</span><span class="pill">Random Forest</span><span class="pill">Gradient Boosting</span><span class="pill">Neural Network</span>
+  </div>
+</div>
+
+<div class="cta-sec">
+  <h2>See the full code</h2>
+  <p>Data pipeline, SQL queries, feature engineering, model comparison notebooks, Streamlit app, and Figma design.</p>
+  <div class="cta-btns">
+    <a class="btn-p" href="https://github.com/NOrlovs/saferide-risk-prediction" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor" style="width:15px;height:15px"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>View on GitHub
+    </a>
+    <a class="btn-o" href="../index.html">← All Projects</a>
+  </div>
+</div>
+
+<footer><a class="f-logo" href="../index.html">N<span>.</span>Orlovs</a><span class="f-copy">© 2026 Nikita Orlovs</span></footer>
+<script>
+  const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');obs.unobserve(e.target)}}),{threshold:.08,rootMargin:'0px 0px -30px 0px'});
+  document.querySelectorAll('.fade').forEach((el,i)=>{el.style.transitionDelay=`${(i%4)*.09}s`;obs.observe(el)});
+  setTimeout(()=>document.querySelector('.hero .fade')?.classList.add('on'),80);
+</script>
+</body>
+</html>

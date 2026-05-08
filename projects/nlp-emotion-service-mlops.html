@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>NLP Emotion Service — Nikita Orlovs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--w:#FAFAF8;--ink:#1A1A18;--mid:#4A4A47;--muted:#9A9A96;--border:#E4E4E0;--acc:#E85D04;--card:#F4F4F0;--dk:#141412;--dkc:#1E1E1C;--dkb:#2E2E2B}
+    html{scroll-behavior:smooth}
+    body{font-family:'Figtree',sans-serif;background:var(--w);color:var(--ink);line-height:1.6;overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--acc);border-radius:3px}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 5vw;height:60px;background:rgba(250,250,248,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+    .nav-back{display:inline-flex;align-items:center;gap:8px;font-size:.82rem;font-weight:500;color:var(--mid);text-decoration:none;transition:color .2s}.nav-back:hover{color:var(--acc)}
+    .nav-back svg{width:16px;height:16px}
+    .nav-logo{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--ink);text-decoration:none}.nav-logo span{color:var(--acc)}
+    .nav-gh{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:var(--ink);color:#fff;border-radius:4px;font-size:.8rem;font-weight:600;text-decoration:none;transition:background .2s}.nav-gh:hover{background:var(--acc)}
+    .nav-gh svg{width:14px;height:14px}
+    .hero{background:var(--dk);padding:110px 5vw 80px;position:relative;overflow:hidden}
+    .hero-bg{position:absolute;top:50%;right:-2vw;transform:translateY(-50%);font-family:'Playfair Display',serif;font-size:clamp(90px,14vw,180px);font-weight:700;color:transparent;-webkit-text-stroke:1px #252523;pointer-events:none;user-select:none;white-space:nowrap;z-index:0}
+    .hero-inner{max-width:860px;position:relative;z-index:1}
+    .hero-pill{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border:1px solid var(--dkb);border-radius:100px;font-size:.72rem;font-weight:500;color:#7A7A76;margin-bottom:1.5rem;letter-spacing:.04em}
+    .hero-dot{width:6px;height:6px;background:var(--acc);border-radius:50%}
+    h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5vw,3.8rem);font-weight:700;color:#fff;line-height:1.1;letter-spacing:-.03em;margin-bottom:1rem}
+    h1 em{font-style:italic;color:var(--acc)}
+    .hero-sub{font-size:1rem;font-weight:300;color:#8A8A86;max-width:580px;line-height:1.8;margin-bottom:2.5rem}
+    .hero-sub strong{color:#C0C0BC;font-weight:500}
+    .hero-meta{display:flex;flex-wrap:wrap;gap:2rem;margin-bottom:2.5rem;padding-bottom:2.5rem;border-bottom:1px solid var(--dkb)}
+    .meta-item .meta-label{font-size:.65rem;font-weight:600;color:#5A5A56;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px}
+    .meta-item .meta-val{font-size:.88rem;font-weight:500;color:#C0C0BC}
+    .hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
+    .btn-p{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:var(--acc);color:#fff;border-radius:4px;font-size:.85rem;font-weight:600;text-decoration:none;transition:background .2s,transform .15s}.btn-p:hover{background:#FF7A2F;transform:translateY(-2px)}
+    .btn-o{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:transparent;color:#8A8A86;border:1.5px solid var(--dkb);border-radius:4px;font-size:.85rem;font-weight:500;text-decoration:none;transition:border-color .2s,color .2s,transform .15s}.btn-o:hover{border-color:var(--acc);color:var(--acc);transform:translateY(-2px)}
+    .btn-p svg,.btn-o svg{width:15px;height:15px}
+    .main-img{background:var(--dkc);border-bottom:1px solid var(--dkb);overflow:hidden;max-height:460px}
+    .main-img img{width:100%;display:block;object-fit:cover;object-position:top}
+    .sec{padding:80px 5vw}
+    .sec.dk{background:var(--dk)}
+    .sec.card{background:var(--card)}
+    .sec-label{font-size:.7rem;font-weight:600;color:var(--acc);text-transform:uppercase;letter-spacing:.12em;display:flex;align-items:center;gap:10px;margin-bottom:.7rem}
+    .sec-label::before{content:'';display:block;width:22px;height:2px;background:var(--acc)}
+    h2{font-family:'Playfair Display',serif;font-size:clamp(1.7rem,3.5vw,2.5rem);font-weight:700;color:var(--ink);line-height:1.15;letter-spacing:-.02em;margin-bottom:1rem}
+    h2.light{color:#fff}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
+    .two.rev{direction:rtl}.two.rev>*{direction:ltr}
+    p.b{font-size:.92rem;font-weight:300;color:var(--mid);line-height:1.8;margin-bottom:.9rem}
+    p.b strong{color:var(--ink);font-weight:500}
+    p.b.l{color:#8A8A86}p.b.l strong{color:#C0C0BC}
+    .imgbox{border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--card)}
+    .imgbox.dk{border-color:var(--dkb);background:var(--dkc)}
+    .imgbox img{width:100%;display:block}
+    .imgcap{font-size:.72rem;color:var(--muted);padding:9px 14px;border-top:1px solid var(--border);font-style:italic}
+    .imgcap.dk{color:#5A5A56;border-color:var(--dkb)}
+    .steps{display:flex;flex-direction:column;gap:.8rem;margin-top:1.5rem}
+    .step{display:flex;align-items:flex-start;gap:14px;padding:.9rem 1.1rem;background:var(--w);border:1px solid var(--border);border-radius:8px}
+    .step.dk{background:var(--dkc);border-color:var(--dkb)}
+    .step-n{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--acc);min-width:26px;padding-top:1px}
+    .step-t{font-size:.86rem;font-weight:300;color:var(--mid);line-height:1.6}
+    .step-t.l{color:#8A8A86}.step-t strong{color:var(--ink);font-weight:500}.step-t.l strong{color:#C0C0BC}
+    .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:1.5rem}
+    .pill{padding:6px 14px;background:var(--card);border:1px solid var(--border);border-radius:100px;font-size:.82rem;font-weight:400;color:var(--ink);transition:all .2s}.pill:hover{background:var(--acc);border-color:var(--acc);color:#fff}
+    .pill.c{background:var(--ink);border-color:var(--ink);color:var(--w)}.pill.c:hover{background:var(--acc);border-color:var(--acc)}
+    .feats{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:1.2rem}
+    .feat{display:flex;align-items:flex-start;gap:10px;font-size:.85rem;color:var(--mid);font-weight:300;line-height:1.5}
+    .feat svg{width:15px;height:15px;color:var(--acc);flex-shrink:0;margin-top:3px}
+    .feat strong{color:var(--ink);font-weight:500}
+    .cta-sec{background:var(--dk);padding:80px 5vw;text-align:center}
+    .cta-sec h2{color:#fff;margin-bottom:1rem}
+    .cta-sec p{color:#7A7A76;max-width:480px;margin:0 auto 2.5rem;font-size:.92rem;line-height:1.7}
+    .cta-btns{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
+    footer{background:var(--dk);border-top:1px solid var(--dkb);padding:20px 5vw;display:flex;align-items:center;justify-content:space-between}
+    .f-logo{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;color:#fff;text-decoration:none}.f-logo span{color:var(--acc)}
+    .f-copy{font-size:.75rem;color:#3A3A36}
+    .fade{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+    .fade.on{opacity:1;transform:translateY(0)}
+    @media(max-width:800px){.two{grid-template-columns:1fr}.two.rev{direction:ltr}.feats{grid-template-columns:1fr}footer{flex-direction:column;gap:8px;text-align:center}}
+  </style>
+</head>
+<body>
+<nav>
+  <a class="nav-back" href="../index.html">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3L5 8l5 5"/></svg>All Projects
+  </a>
+  <a class="nav-logo" href="../index.html">N<span>.</span>Orlovs</a>
+  <a class="nav-gh" href="https://github.com/NOrlovs/nlp-emotion-service-mlops" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub
+  </a>
+</nav>
+
+<div class="hero">
+  <div class="hero-bg" aria-hidden="true">NLP</div>
+  <div class="hero-inner fade">
+    <div class="hero-pill"><span class="hero-dot"></span>MLOps · API · Azure</div>
+    <h1>Emotion Classification<br><em>Service</em></h1>
+    <p class="hero-sub">Turning a fine-tuned classifier into a <strong>deployable, maintainable service</strong> — FastAPI backend, Docker, Streamlit demo, and a full Azure ML retraining pipeline from feedback to conditional deployment.</p>
+    <div class="hero-meta">
+      <div class="meta-item"><div class="meta-label">Client</div><div class="meta-val">BUas Academic Project</div></div>
+      <div class="meta-item"><div class="meta-label">Timeline</div><div class="meta-val">May – Jun 2025</div></div>
+      <div class="meta-item"><div class="meta-label">Role</div><div class="meta-val">ML Engineer / MLOps</div></div>
+      <div class="meta-item"><div class="meta-label">Type</div><div class="meta-val">End-to-end service</div></div>
+    </div>
+    <div class="hero-btns">
+      <a class="btn-p" href="https://github.com/NOrlovs/nlp-emotion-service-mlops" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>View on GitHub
+      </a>
+      <a class="btn-o" href="../index.html">← Back to Portfolio</a>
+    </div>
+  </div>
+</div>
+
+<div class="main-img"><img src="../assets/projects/nlp-hero.png" alt="NLP Service UI" loading="lazy"/></div>
+
+<div class="sec fade">
+  <div class="sec-label">Overview</div>
+  <div class="two">
+    <div>
+      <h2>The problem with<br>"good enough" models</h2>
+      <p class="b">Most ML projects end at the notebook. You have a model that scores well on a test set — and then it just sits there. The real challenge is making it useful: something you can deploy, update with new data, and trust to behave predictably in production.</p>
+      <p class="b">This project took an existing <strong>emotion classifier (DistilRoBERTa fine-tuned on Russian speech transcripts)</strong> and built the full production wrapper around it. The goal wasn't to improve the model — it was to make it <strong>deployable, testable, and maintainable</strong>.</p>
+      <p class="b">The result: a Dockerized API anyone on the team can run with one command, a Streamlit UI for demos, and an Azure ML pipeline that handles the full retraining cycle automatically.</p>
+    </div>
+    <div>
+      <div class="imgbox">
+        <img src="../assets/projects/nlp-csv.png" alt="Bulk CSV prediction" loading="lazy"/>
+        <div class="imgcap">Bulk CSV prediction — upload a file with a text column, download predictions</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sec card fade">
+  <div class="sec-label">What I Built</div>
+  <div class="two rev">
+    <div>
+      <div class="imgbox">
+        <img src="../assets/projects/nlp-audio.png" alt="Audio transcription" loading="lazy"/>
+        <div class="imgcap">Optional audio transcription — upload audio, receive emotion predictions</div>
+      </div>
+    </div>
+    <div>
+      <h2>Local service +<br>Cloud pipeline</h2>
+      <p class="b">The service has two deployment targets. <strong>Locally via Docker Compose</strong> — one command builds and starts both API and Streamlit. In the cloud via <strong>Azure ML</strong> — a pipeline that can be triggered on new feedback data.</p>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div class="step-t"><strong>FastAPI backend</strong> — /predict for single text, /upload-csv + /download-csv for bulk. Feature flags keep optional endpoints (transcription, feedback) off by default — no secrets in repo.</div></div>
+        <div class="step"><div class="step-n">2</div><div class="step-t"><strong>Streamlit UI</strong> — clean demo for single predictions, bulk CSV, and audio transcription. Built for handover and live demos.</div></div>
+        <div class="step"><div class="step-n">3</div><div class="step-t"><strong>Docker Compose</strong> — API on :3130, Streamlit on :3134. Single command, consistent behaviour across machines.</div></div>
+        <div class="step"><div class="step-n">4</div><div class="step-t"><strong>pytest suite + structured logging</strong> — endpoint tests, service logic, preprocessing. Failures are traceable, not silent.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sec dk fade">
+  <div class="sec-label">Azure ML Pipeline</div>
+  <div class="two">
+    <div>
+      <h2 class="light">Automated retraining,<br>end to end</h2>
+      <p class="b l">The Azure ML pipeline handles the complete retraining cycle. New feedback merges into the dataset, the model retrains, metrics are compared against the current production model, and deployment only happens if the new model actually wins.</p>
+      <p class="b l">The <strong>conditional deploy step</strong> is the important part — it prevents the common failure mode where a new training run ships a worse model to production because no one checked.</p>
+      <div class="steps">
+        <div class="step dk"><div class="step-n">→</div><div class="step-t l"><strong>Merge feedback</strong> — new labelled data joins the existing dataset</div></div>
+        <div class="step dk"><div class="step-n">→</div><div class="step-t l"><strong>Preprocess</strong> — clean, tokenise, train/val split</div></div>
+        <div class="step dk"><div class="step-n">→</div><div class="step-t l"><strong>Train</strong> — fine-tune DistilRoBERTa on updated data</div></div>
+        <div class="step dk"><div class="step-n">→</div><div class="step-t l"><strong>Evaluate + Compare</strong> — new vs current production model</div></div>
+        <div class="step dk"><div class="step-n">→</div><div class="step-t l"><strong>Conditional Deploy</strong> — only promote if new model outperforms current</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="imgbox dk">
+        <img src="../assets/projects/nlp-azure.png" alt="Azure ML architecture" loading="lazy"/>
+        <div class="imgcap dk">Azure ML architecture — cloud retraining and deployment pipeline</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sec fade">
+  <div class="sec-label">Tech Stack</div>
+  <div class="two">
+    <div>
+      <h2>What went into it</h2>
+      <p class="b">A practical stack chosen for deployability, not novelty. Everything that runs locally also runs in the cloud with minimal configuration changes.</p>
+      <div class="pills">
+        <span class="pill c">Python 3.10</span><span class="pill c">FastAPI</span><span class="pill c">Docker</span><span class="pill c">Azure ML</span>
+        <span class="pill">PyTorch</span><span class="pill">HuggingFace Transformers</span><span class="pill">DistilRoBERTa</span>
+        <span class="pill">Streamlit</span><span class="pill">pytest</span><span class="pill">Whisper STT</span><span class="pill">Docker Compose</span>
+      </div>
+    </div>
+    <div>
+      <h2 style="font-size:1.2rem;margin-bottom:1rem;color:var(--ink)">Key design decisions</h2>
+      <div class="feats">
+        <div class="feat"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4,8 7,11 12,5"/></svg><span><strong>Feature flags</strong> keep transcription and Azure feedback off by default — clean deploys, no missing secrets</span></div>
+        <div class="feat"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4,8 7,11 12,5"/></svg><span><strong>Conditional deploy</strong> prevents regressions — model only promoted if it outperforms production</span></div>
+        <div class="feat"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4,8 7,11 12,5"/></svg><span><strong>Structured logging</strong> throughout — all failures are traceable, not swallowed silently</span></div>
+        <div class="feat"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4,8 7,11 12,5"/></svg><span><strong>Pinned requirements</strong> and Docker — reproducible across machines, no "works on my machine"</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cta-sec">
+  <h2>See the full code</h2>
+  <p>Complete source, Docker setup, Azure ML pipeline definition, and pytest tests — all on GitHub.</p>
+  <div class="cta-btns">
+    <a class="btn-p" href="https://github.com/NOrlovs/nlp-emotion-service-mlops" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor" style="width:15px;height:15px"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>View on GitHub
+    </a>
+    <a class="btn-o" href="../index.html">← All Projects</a>
+  </div>
+</div>
+
+<footer><a class="f-logo" href="../index.html">N<span>.</span>Orlovs</a><span class="f-copy">© 2026 Nikita Orlovs</span></footer>
+
+<script>
+  const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');obs.unobserve(e.target)}}),{threshold:.08,rootMargin:'0px 0px -30px 0px'});
+  document.querySelectorAll('.fade').forEach((el,i)=>{el.style.transitionDelay=`${(i%4)*.09}s`;obs.observe(el)});
+  setTimeout(()=>document.querySelector('.hero .fade')?.classList.add('on'),80);
+</script>
+</body>
+</html>

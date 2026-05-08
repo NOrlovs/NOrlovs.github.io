@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Grocery Image Classifier + XAI — Nikita Orlovs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--w:#FAFAF8;--ink:#1A1A18;--mid:#4A4A47;--muted:#9A9A96;--border:#E4E4E0;--acc:#E85D04;--card:#F4F4F0;--dk:#141412;--dkc:#1E1E1C;--dkb:#2E2E2B}
+    html{scroll-behavior:smooth}body{font-family:'Figtree',sans-serif;background:var(--w);color:var(--ink);line-height:1.6;overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--acc);border-radius:3px}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 5vw;height:60px;background:rgba(250,250,248,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+    .nav-back{display:inline-flex;align-items:center;gap:8px;font-size:.82rem;font-weight:500;color:var(--mid);text-decoration:none;transition:color .2s}.nav-back:hover{color:var(--acc)}.nav-back svg{width:16px;height:16px}
+    .nav-logo{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--ink);text-decoration:none}.nav-logo span{color:var(--acc)}
+    .nav-gh{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:var(--ink);color:#fff;border-radius:4px;font-size:.8rem;font-weight:600;text-decoration:none;transition:background .2s}.nav-gh:hover{background:var(--acc)}.nav-gh svg{width:14px;height:14px}
+    .hero{background:var(--dk);padding:110px 5vw 80px;position:relative;overflow:hidden}
+    .hero-bg{position:absolute;top:50%;right:-2vw;transform:translateY(-50%);font-family:'Playfair Display',serif;font-size:clamp(80px,13vw,170px);font-weight:700;color:transparent;-webkit-text-stroke:1px #252523;pointer-events:none;user-select:none;white-space:nowrap;z-index:0}
+    .hero-inner{max-width:860px;position:relative;z-index:1}
+    .hero-pill{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border:1px solid var(--dkb);border-radius:100px;font-size:.72rem;font-weight:500;color:#7A7A76;margin-bottom:1.5rem;letter-spacing:.04em}
+    .hero-dot{width:6px;height:6px;background:var(--acc);border-radius:50%}
+    h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5vw,3.8rem);font-weight:700;color:#fff;line-height:1.1;letter-spacing:-.03em;margin-bottom:1rem}h1 em{font-style:italic;color:var(--acc)}
+    .hero-sub{font-size:1rem;font-weight:300;color:#8A8A86;max-width:580px;line-height:1.8;margin-bottom:2.5rem}.hero-sub strong{color:#C0C0BC;font-weight:500}
+    .hero-meta{display:flex;flex-wrap:wrap;gap:2rem;margin-bottom:2.5rem;padding-bottom:2.5rem;border-bottom:1px solid var(--dkb)}
+    .meta-item .meta-label{font-size:.65rem;font-weight:600;color:#5A5A56;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px}
+    .meta-item .meta-val{font-size:.88rem;font-weight:500;color:#C0C0BC}
+    .hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
+    .btn-p{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:var(--acc);color:#fff;border-radius:4px;font-size:.85rem;font-weight:600;text-decoration:none;transition:background .2s,transform .15s}.btn-p:hover{background:#FF7A2F;transform:translateY(-2px)}
+    .btn-o{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:transparent;color:#8A8A86;border:1.5px solid var(--dkb);border-radius:4px;font-size:.85rem;font-weight:500;text-decoration:none;transition:border-color .2s,color .2s,transform .15s}.btn-o:hover{border-color:var(--acc);color:var(--acc);transform:translateY(-2px)}
+    .main-img{background:var(--dkc);border-bottom:1px solid var(--dkb);overflow:hidden;max-height:480px}
+    .main-img img{width:100%;display:block;object-fit:cover;object-position:center}
+    .sec{padding:80px 5vw}.sec.dk{background:var(--dk)}.sec.card{background:var(--card)}
+    .sec-label{font-size:.7rem;font-weight:600;color:var(--acc);text-transform:uppercase;letter-spacing:.12em;display:flex;align-items:center;gap:10px;margin-bottom:.7rem}
+    .sec-label::before{content:'';display:block;width:22px;height:2px;background:var(--acc)}
+    h2{font-family:'Playfair Display',serif;font-size:clamp(1.7rem,3.5vw,2.5rem);font-weight:700;color:var(--ink);line-height:1.15;letter-spacing:-.02em;margin-bottom:1rem}h2.l{color:#fff}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}.two.rev{direction:rtl}.two.rev>*{direction:ltr}
+    p.b{font-size:.92rem;font-weight:300;color:var(--mid);line-height:1.8;margin-bottom:.9rem}p.b strong{color:var(--ink);font-weight:500}p.b.l{color:#8A8A86}p.b.l strong{color:#C0C0BC}
+    .imgbox{border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--card)}.imgbox.dk{border-color:var(--dkb);background:var(--dkc)}.imgbox img{width:100%;display:block}
+    .imgcap{font-size:.72rem;color:var(--muted);padding:9px 14px;border-top:1px solid var(--border);font-style:italic}.imgcap.dk{color:#5A5A56;border-color:var(--dkb)}
+    .img-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .model-table{width:100%;border-collapse:collapse;margin-top:1.5rem;font-size:.88rem}
+    .model-table th{font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:8px 12px;border-bottom:2px solid var(--border);text-align:left}
+    .model-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--mid);font-weight:300}
+    .model-table tr.best td{color:var(--ink);font-weight:500;background:rgba(232,93,4,.06)}
+    .model-table .acc{font-weight:600;color:var(--acc)}
+    .class-bars{margin-top:1.5rem;display:flex;flex-direction:column;gap:.8rem}
+    .class-bar-item{}
+    .class-bar-label{display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:5px}
+    .class-bar-name{font-weight:500;color:var(--ink)}
+    .class-bar-val{font-weight:600;color:var(--acc)}
+    .class-bar-track{height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+    .class-bar-fill{height:100%;background:var(--acc);border-radius:4px;transition:width 1s ease}
+    .class-bar-fill.low{background:var(--dkb)}
+    .xai-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem}
+    .xai-item .xai-label{font-size:.75rem;font-weight:600;color:var(--acc);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;display:block}
+    .metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1px;background:var(--dkb);border:1px solid var(--dkb);border-radius:10px;overflow:hidden;margin-top:2rem}
+    .metric{background:var(--dkc);padding:1.4rem;text-align:center}
+    .metric-n{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:#fff;letter-spacing:-.03em;line-height:1}.metric-n span{color:var(--acc)}
+    .metric-l{font-size:.68rem;font-weight:500;color:#5A5A56;margin-top:6px;text-transform:uppercase;letter-spacing:.08em}
+    .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:1.5rem}
+    .pill{padding:6px 14px;background:var(--card);border:1px solid var(--border);border-radius:100px;font-size:.82rem;font-weight:400;color:var(--ink);transition:all .2s}.pill:hover{background:var(--acc);border-color:var(--acc);color:#fff}
+    .pill.c{background:var(--ink);border-color:var(--ink);color:var(--w)}.pill.c:hover{background:var(--acc);border-color:var(--acc)}
+    .callout{padding:1.2rem 1.4rem;background:rgba(232,93,4,.08);border:1px solid rgba(232,93,4,.2);border-radius:8px;font-size:.88rem;color:var(--mid);line-height:1.6;margin-top:1rem}
+    .callout strong{color:var(--acc)}
+    .cta-sec{background:var(--dk);padding:80px 5vw;text-align:center}
+    .cta-sec h2{color:#fff;margin-bottom:1rem}.cta-sec p{color:#7A7A76;max-width:480px;margin:0 auto 2.5rem;font-size:.92rem;line-height:1.7}
+    .cta-btns{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
+    footer{background:var(--dk);border-top:1px solid var(--dkb);padding:20px 5vw;display:flex;align-items:center;justify-content:space-between}
+    .f-logo{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;color:#fff;text-decoration:none}.f-logo span{color:var(--acc)}
+    .f-copy{font-size:.75rem;color:#3A3A36}
+    .fade{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}.fade.on{opacity:1;transform:translateY(0)}
+    @media(max-width:800px){.two{grid-template-columns:1fr}.two.rev{direction:ltr}.xai-grid{grid-template-columns:1fr}.img-grid{grid-template-columns:1fr}footer{flex-direction:column;gap:8px;text-align:center}}
+  </style>
+</head>
+<body>
+<nav>
+  <a class="nav-back" href="../index.html"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3L5 8l5 5"/></svg>All Projects</a>
+  <a class="nav-logo" href="../index.html">N<span>.</span>Orlovs</a>
+  <a class="nav-gh" href="https://github.com/NOrlovs/product-image-classifier-hcai" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub
+  </a>
+</nav>
+
+<div class="hero">
+  <div class="hero-bg" aria-hidden="true">XAI</div>
+  <div class="hero-inner fade">
+    <div class="hero-pill"><span class="hero-dot"></span>CNN · XAI · Fairness · HCAI</div>
+    <h1>Grocery Image Classifier<br><em>+ Full XAI Suite</em></h1>
+    <p class="hero-sub">A CNN classifier for grocery product categories, with <strong>five XAI methods</strong> (Grad-CAM, LIME, SHAP...) to understand model decisions, a <strong>fairness analysis</strong> revealing a 50 pp accuracy gap, and a real <strong>A/B usability test</strong>.</p>
+    <div class="hero-meta">
+      <div class="meta-item"><div class="meta-label">Context</div><div class="meta-val">BUas Academic Project</div></div>
+      <div class="meta-item"><div class="meta-label">Timeline</div><div class="meta-val">Feb – Apr 2024</div></div>
+      <div class="meta-item"><div class="meta-label">Role</div><div class="meta-val">ML Engineer + HCAI</div></div>
+      <div class="meta-item"><div class="meta-label">Dataset</div><div class="meta-val">880 images, 4 classes</div></div>
+    </div>
+    <div class="hero-btns">
+      <a class="btn-p" href="https://github.com/NOrlovs/product-image-classifier-hcai" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width:15px;height:15px"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>View on GitHub
+      </a>
+      <a class="btn-o" href="../index.html">← Back to Portfolio</a>
+    </div>
+  </div>
+</div>
+
+<div class="main-img"><img src="../assets/projects/hcai-gradcam.png" alt="Grad-CAM++ heatmap on correct prediction" loading="lazy"/></div>
+
+<div class="sec fade">
+  <div class="sec-label">Overview</div>
+  <div class="two">
+    <div>
+      <h2>More than a classifier —<br>understanding what it sees</h2>
+      <p class="b">The starting point: a CNN that classifies grocery product images into four categories (Beverages, Dairy, Fruits & Vegetables, Meat). 880 images scraped from Google Images, four architecture iterations, V1 through V4.</p>
+      <p class="b">The interesting part came after training. <strong>V2 outperformed V4</strong> — the model with more layers and Dropout scored lower. On a small dataset (880 images), regularisation that should help actually hurts. This isn't a bug, it's a genuine finding about the relationship between dataset size and regularisation.</p>
+      <p class="b">Then came the harder question: <strong>why does the model fail?</strong> Five XAI methods were applied to understand decision patterns, find failure modes, and identify a significant fairness problem hidden inside the accuracy numbers.</p>
+    </div>
+    <div>
+      <table class="model-table">
+        <tr><th>Model</th><th>Architecture</th><th>Val Acc</th></tr>
+        <tr><td>V1</td><td>2 conv layers</td><td>80.1%</td></tr>
+        <tr class="best"><td>V2 ✓</td><td>3 conv layers</td><td class="acc">84.7%</td></tr>
+        <tr><td>V3</td><td>3 conv + Dropout</td><td>74.4%</td></tr>
+        <tr><td>V4</td><td>4 conv + Dropout</td><td>79.6%</td></tr>
+      </table>
+      <div class="callout">
+        <strong>Key finding:</strong> V2 beat V4. With only 880 images, Dropout(0.25) acts as excessive regularisation and hurts performance. Architecture choices must be validated empirically — theory doesn't always hold on small datasets.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sec card fade">
+  <div class="sec-label">Fairness Analysis</div>
+  <div class="two rev">
+    <div>
+      <div class="imgbox">
+        <img src="../assets/projects/hcai-fairness.png" alt="Per-class accuracy" loading="lazy"/>
+        <div class="imgcap">Per-class test accuracy — 50 pp gap between best and worst class</div>
+      </div>
+    </div>
+    <div>
+      <h2>A 50-point accuracy gap<br>hidden inside one number</h2>
+      <p class="b">Overall test accuracy: 67.8%. Sounds acceptable. But per-class accuracy tells a different story.</p>
+      <div class="class-bars">
+        <div class="class-bar-item">
+          <div class="class-bar-label"><span class="class-bar-name">Meat products</span><span class="class-bar-val">95.7%</span></div>
+          <div class="class-bar-track"><div class="class-bar-fill" style="width:95.7%"></div></div>
+        </div>
+        <div class="class-bar-item">
+          <div class="class-bar-label"><span class="class-bar-name">Dairy products</span><span class="class-bar-val">72.7%</span></div>
+          <div class="class-bar-track"><div class="class-bar-fill" style="width:72.7%"></div></div>
+        </div>
+        <div class="class-bar-item">
+          <div class="class-bar-label"><span class="class-bar-name">Beverages</span><span class="class-bar-val">56.5%</span></div>
+          <div class="class-bar-track"><div class="class-bar-fill" style="width:56.5%"></div></div>
+        </div>
+        <div class="class-bar-item">
+          <div class="class-bar-label"><span class="class-bar-name">Fruits & Vegetables</span><span class="class-bar-val" style="color:#8A8A86">45.5%</span></div>
+          <div class="class-bar-track"><div class="class-bar-fill low" style="width:45.5%;background:#3A3A36"></div></div>
+        </div>
+      </div>
+      <p class="b" style="margin-top:1rem">The main failure mode: <strong>12 out of 22</strong> Fruits & Vegetables test images were misclassified as Beverages. Root cause: the dataset contains fruit juice, smoothies, and garnished drinks — visually ambiguous between the two classes.</p>
+    </div>
+  </div>
+</div>
+
+<div class="sec dk fade">
+  <div class="sec-label">Explainability (XAI)</div>
+  <div class="two">
+    <div>
+      <h2 class="l">Five methods,<br>one clear story</h2>
+      <p class="b l">Five complementary XAI methods were applied to V4 to understand what drives decisions — both correct and incorrect ones.</p>
+      <p class="b l"><strong>Grad-CAM / Grad-CAM++</strong> — spatial heatmaps showing which image regions the model attends to. Correct: bottle shapes and labels. Incorrect: colour and container shape, not product content.</p>
+      <p class="b l"><strong>LIME</strong> — superpixel attribution via local linear approximation. The most striking finding: a single small yellow superpixel (a berry inside a glass) drove an entire misclassification. The model relies on minimal, fragile features.</p>
+      <p class="b l"><strong>Integrated Gradients</strong> — per-pixel importance along gradient path from black baseline. Highlights fine-grained texture details on packaging labels as the primary decision signal.</p>
+      <p class="b l"><strong>KernelSHAP</strong> — Shapley value-based superpixel attribution. Consistent with LIME findings, confirms reliance on localised cues.</p>
+    </div>
+    <div>
+      <div class="xai-grid">
+        <div class="xai-item">
+          <span class="xai-label">Correct prediction</span>
+          <div class="imgbox dk"><img src="../assets/projects/hcai-gradcam.png" alt="Grad-CAM correct" loading="lazy"/><div class="imgcap dk">Grad-CAM++ — correct: attends to bottle labels</div></div>
+        </div>
+        <div class="xai-item">
+          <span class="xai-label">Incorrect prediction</span>
+          <div class="imgbox dk"><img src="../assets/projects/hcai-gradcam-bad.png" alt="Grad-CAM incorrect" loading="lazy"/><div class="imgcap dk">Grad-CAM++ — incorrect: reads colour not content</div></div>
+        </div>
+        <div class="xai-item" style="grid-column:1/-1">
+          <span class="xai-label">LIME — fragile feature reliance</span>
+          <div class="imgbox dk"><img src="../assets/projects/hcai-lime.png" alt="LIME incorrect" loading="lazy"/><div class="imgcap dk">One small yellow superpixel drives the entire misclassification</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="metrics" style="margin-top:3rem">
+    <div class="metric"><div class="metric-n">84<span>.7%</span></div><div class="metric-l">Best val accuracy (V2)</div></div>
+    <div class="metric"><div class="metric-n">50<span>pp</span></div><div class="metric-l">Accuracy gap (best/worst class)</div></div>
+    <div class="metric"><div class="metric-n">5</div><div class="metric-l">XAI methods applied</div></div>
+    <div class="metric"><div class="metric-n">3<span>/5</span></div><div class="metric-l">A/B test significant questions</div></div>
+  </div>
+</div>
+
+<div class="sec fade">
+  <div class="sec-label">Human-Centered AI</div>
+  <div class="two">
+    <div>
+      <h2>A real A/B usability test</h2>
+      <p class="b">Two interface designs for the classifier app were tested with real users. An independent samples T-test (with Shapiro-Wilk normality and Levene variance homogeneity checks) found <strong>statistically significant differences on 3 out of 5 questions</strong> (p &lt; 0.05).</p>
+      <p class="b">The full analysis including test assumptions, visualisations, and interpretation is in <code>notebooks/04_ab_test_hcai.ipynb</code>.</p>
+    </div>
+    <div>
+      <h2 style="font-size:1.2rem;margin-bottom:1rem">Tech Stack</h2>
+      <div class="pills">
+        <span class="pill c">Python 3.11</span><span class="pill c">TensorFlow</span><span class="pill c">Keras</span>
+        <span class="pill">xplique</span><span class="pill">Grad-CAM / Grad-CAM++</span><span class="pill">LIME</span>
+        <span class="pill">KernelSHAP</span><span class="pill">Integrated Gradients</span>
+        <span class="pill">scikit-learn</span><span class="pill">Matplotlib</span><span class="pill">Seaborn</span><span class="pill">Selenium</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cta-sec">
+  <h2>See the full code</h2>
+  <p>CNN training notebooks, all five XAI methods, fairness analysis, and A/B test with statistical tests — on GitHub.</p>
+  <div class="cta-btns">
+    <a class="btn-p" href="https://github.com/NOrlovs/product-image-classifier-hcai" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor" style="width:15px;height:15px"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>View on GitHub
+    </a>
+    <a class="btn-o" href="../index.html">← All Projects</a>
+  </div>
+</div>
+
+<footer><a class="f-logo" href="../index.html">N<span>.</span>Orlovs</a><span class="f-copy">© 2026 Nikita Orlovs</span></footer>
+<script>
+  const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');obs.unobserve(e.target)}}),{threshold:.08,rootMargin:'0px 0px -30px 0px'});
+  document.querySelectorAll('.fade').forEach((el,i)=>{el.style.transitionDelay=`${(i%4)*.09}s`;obs.observe(el)});
+  setTimeout(()=>document.querySelector('.hero .fade')?.classList.add('on'),80);
+</script>
+</body>
+</html>
